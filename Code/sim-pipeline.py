@@ -279,7 +279,7 @@ if destination == 'drive':
   base_dir = '/content/gdrive/MyDrive/Colab Notebooks/'
 else:
   base_dir = 'simulations/'
-base_dir = base_dir + 'simulations-22June/'
+base_dir = base_dir + 'simulations-24June/'
 createDir(base_dir)
 
 # %% [markdown]
@@ -441,17 +441,18 @@ def plotActionHistory():
 #@title
 
 nruns = 1
-nExps = 2
 
 #experimental conditions change here. 
 from itertools import product as pr
-gc = np.array([0.01,0.02,0.1])
-dc = np.array([0.01,0.02,0.1])
+gc = np.array([0.01])
+dc = np.array([0.01])
 nb = np.array([3,4])
 alpha = np.array([0.05,0.1,0.2])
 gamma = np.array([0.01,0.05,0.1])
 contri_index = np.array([0,1,2])
-expVars = np.array(list(pr(nb,gc,dc,contri_index)))[:2]
+expVars = np.array(list(pr(nb,gc,dc,contri_index)))
+# expVars = expVars[np.random.randint(0,expVars.shape[0],5)]
+
 
 contributions = np.array([
        [1, 1, 1, 1],
@@ -486,7 +487,7 @@ for exp in range(expVars.shape[0]):
     ncols = gut.nBacteria//nrows 
 
     stepSize = 1
-    iterations = 2000
+    iterations = 200000
     n = iterations//stepSize
 
     # below parameters to pick appropriate data points for plotting only.
@@ -538,10 +539,15 @@ for exp in range(expVars.shape[0]):
 
   np.save(folder+'population-dynamics_'+str(counter+1)+'.npy',gutPopHistory)
   np.save(folder+'state-dynamics_'+str(counter+1)+'.npy',stateHistory)
+  np.save(folder+'behavior-dynamics_'+str(counter+1)+'.npy',behaviorHistory)
+  np.save(folder+'qtable_'+str(counter+1)+'.npy',brain.qTable)
+  np.save(folder+'reward_'+str(counter+1)+'.npy',rewardHistory)
+  np.save(folder+'action_'+str(counter+1)+'.npy',actionHistory)
 
   plotVars = {
     'gutPopHistory' : gutPopHistory,
     'stateHistory' : stateHistory,
+    'behaviorHistory' : behaviorHistory,
     'expVars' : expVars,
     'iterations': iterations,
     'gc' :gut.gc,
