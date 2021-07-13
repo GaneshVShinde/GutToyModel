@@ -18,7 +18,6 @@ from datetime import datetime
 import os,errno
 import pymongo
 
-
 mongo_url = "mongodb://localhost:27017/"
 
 mongo_client = pymongo.MongoClient(mongo_url)
@@ -27,12 +26,7 @@ db_gut=mongo_client["gut"]
 controls_db= db_gut["controls"]
 
 gutHistory_db=db_gut["gutHistory"]
-rewardHistory_db=db_gut["rewardHistory"]
-actionHistory_db=db_gut["actionHistory"]
-stateHistory_db=db_gut["stateHistory"]
-behaviorHistory_db=db_gut["behaviorHistory"]
-qtableHistory_db=db_gut["qtableHistory"]
-# rewardHistory_db=db_gut["rewardHistory"]
+
 # %%
 #@title
 def createDir(dir):
@@ -455,30 +449,16 @@ def plotActionHistory():
 # %%capture out
 #@title
 
-
 if __name__=='__main__':
   #print(1)
   nruns = 1
-  gutHistory_db.remove()
-  rewardHistory_db.remove()
-  behaviorHistory_db.remove()
-  stateHistory_db.remove()
-  actionHistory_db.remove()
-
-  controls=list(controls_db.find({}))[0]
-  #def update_controls():
-  gc=np.array([controls["GC"]])
-  dc=np.array([controls["DC"]])
-  nb=np.array([controls['nb']])
-  # nn=np.array([controls['nn']])
-
 
   #experimental conditions change here. 
   from itertools import product as pr
 
-  # gc = np.array([0.01])
-  # dc = np.array([0.01])
-  # nb = np.array([3])
+  gc = np.array([0.01])
+  dc = np.array([0.01])
+  nb = np.array([3,4])
   alpha = np.array([0.05,0.1,0.2])
   gamma = np.array([0.01,0.05,0.1])
   contri_index = np.array([0,1,2])
@@ -519,7 +499,7 @@ if __name__=='__main__':
       ncols = gut.nBacteria//nrows 
 
       stepSize = 1
-      iterations = 70000
+      iterations = 200000
       n = iterations//stepSize
 
       # below parameters to pick appropriate data points for plotting only.
@@ -558,30 +538,15 @@ if __name__=='__main__':
           if t%epsilon_mod ==0:
               brain.epsilon*=0.99
 
-          if t%10000==0:
-            gc=controls_db.find({'id':1})
-
           if t%stepSize==0:
 
               behaviorHistory[idx] = behavior.output
-              # print("idx:",idx,"-",behavior.output)
-              
+              #print("idx:",idx,"-",behavior.output)
               gutPopHistory[idx] = gut.pop
-              gutHistory_db.insert_one({str(idx):list(gut.pop)})
-      
+              gutHistory_db.insert_one({idx:gut.pop})
               rewardHistory[idx] = gut.reward
-              rewardHistory_db.insert_one({str(idx):gut.reward})
-              
               stateHistory[idx] = behavior.stateSet[oldInd]
-              stateHistory_db.insert_one({str(idx):list(behavior.stateSet[oldInd])})
-
               actionHistory[idx] = behavior.actionSet[actionInd]
-              actionHistory_db.insert_one({str(idx):list(behavior.actionSet[actionInd])})
-
-              if t%200==0:
-                pass
-                # qtableHistory_db.insert_one({str(idx):brain.qTable})
-              # print("actionHistory",behavior.actionSet[actionInd])
 
               idx+=1
 
@@ -609,6 +574,7 @@ if __name__=='__main__':
       'contributions': gut.contribution,
       'nrows' : nrows,
       'ncols' : ncols,
+      'folder' : folder,
       'fileFormat' : fileFormat,
       'exp' : exp,
       'nb' : nb,
@@ -635,5 +601,3 @@ if __name__=='__main__':
       # plotActionHistory()
 
 
-
-# %%
